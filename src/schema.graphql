@@ -1,0 +1,57 @@
+# import * from './generated/prisma.graphql'
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type SuccessMessage {
+  message: String
+}
+
+type Mutation {
+  createTrainer(data: TrainerCreateInput!): Trainer!
+  updateTrainer(
+    data: TrainerUpdateInput!
+    where: TrainerWhereUniqueInput!
+  ): Trainer
+  deleteTrainer(where: TrainerWhereUniqueInput!): Trainer
+
+  createSport(data: SportCreateInput!): Sport!
+  updateSport(data: SportUpdateInput!, where: SportWhereUniqueInput!): Sport
+  deleteSport(where: SportWhereUniqueInput!): Sport
+
+  signup(email: String!, password: String!, name: String!): User!
+  signin(email: String!, password: String!): User!
+  signout: SuccessMessage
+  requestReset(email: String!): SuccessMessage
+  resetPassword(
+    resetToken: String!
+    password: String!
+    confirmPassword: String!
+  ): User!
+}
+
+type Query {
+  me: User
+
+  users: [User]!
+  trainers(
+    where: TrainerWhereInput
+    orderBy: TrainerOrderByInput
+    skip: Int
+    first: Int
+  ): [Trainer]!
+  trainer(where: TrainerWhereUniqueInput!): Trainer
+  trainersConnection(where: TrainerWhereInput): TrainerConnection
+
+  sports(
+    where: SportWhereInput
+    orderBy: SportOrderByInput
+    skip: Int
+    first: Int
+  ): [Sport]!
+  sport(where: SportWhereUniqueInput!): Sport
+  sportsConnection(where: SportWhereInput): SportConnection
+}

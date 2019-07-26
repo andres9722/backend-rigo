@@ -1,0 +1,22 @@
+
+
+type Sport {
+  id: ID! @id @unique
+  name: String!
+  capacity: String!
+}
+
+type User {
+  id: ID! @id @unique
+  name: String!
+  email: String! @unique
+  password: String!
+  resetToken: String
+  resetTokenExpiry: Float
+}
+
+type Trainer {
+  id: ID! @id @unique
+  name: String!
+  email: String! @unique
+}

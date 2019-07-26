@@ -1,0 +1,5 @@
+endpoint: https://us1.prisma.sh/andres-felipe-alvarez-caballero-09aa06/backend-sport/dev
+datamodel: datamodel.prisma
+hooks:
+  post-deploy:
+    - graphql get-schema -p prisma
