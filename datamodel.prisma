@@ -1,9 +1,29 @@
 
+enum SportType {
+  GRUPAL
+  INDIVIDUAL
+}
+
+enum Permission {
+  ADMIN
+  USER
+  SPORTCREATE
+  SPORTUPDATE
+  SPORTDELETE
+  TRAINERCREATE
+  TRAINERUPDATE
+  TRAINERDELETE
+  PERMISSIONUPDATE
+}
 
 type Sport {
   id: ID! @id @unique
   name: String!
   capacity: String!
+  type: SportType! @default(value: INDIVIDUAL)
+  user: User!
+  trainer: Trainer!
+  students: [Student]! @scalarList(strategy: RELATION)
 }
 
 type User {
@@ -13,10 +33,19 @@ type User {
   password: String!
   resetToken: String
   resetTokenExpiry: Float
+  permissions: [Permission] @scalarList(strategy: RELATION)
 }
 
 type Trainer {
   id: ID! @id @unique
   name: String!
   email: String! @unique
+  user: User!
+}
+
+type Student {
+  id: ID! @id @unique
+  studentName: String!
+  studentEmail: String! @unique
+  studentAge: Int!
 }

@@ -1,7 +1,11 @@
 # source: https://us1.prisma.sh/andres-felipe-alvarez-caballero-09aa06/backend-sport/dev
-# timestamp: Thu Jul 25 2019 23:35:33 GMT-0500 (Colombia Standard Time)
+# timestamp: Mon Jul 29 2019 22:52:58 GMT-0500 (Colombia Standard Time)
 
 type AggregateSport {
+  count: Int!
+}
+
+type AggregateStudent {
   count: Int!
 }
 
@@ -26,23 +30,29 @@ scalar Long
 
 type Mutation {
   createSport(data: SportCreateInput!): Sport!
-  createUser(data: UserCreateInput!): User!
   createTrainer(data: TrainerCreateInput!): Trainer!
+  createUser(data: UserCreateInput!): User!
+  createStudent(data: StudentCreateInput!): Student!
   updateSport(data: SportUpdateInput!, where: SportWhereUniqueInput!): Sport
-  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   updateTrainer(data: TrainerUpdateInput!, where: TrainerWhereUniqueInput!): Trainer
+  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updateStudent(data: StudentUpdateInput!, where: StudentWhereUniqueInput!): Student
   deleteSport(where: SportWhereUniqueInput!): Sport
-  deleteUser(where: UserWhereUniqueInput!): User
   deleteTrainer(where: TrainerWhereUniqueInput!): Trainer
+  deleteUser(where: UserWhereUniqueInput!): User
+  deleteStudent(where: StudentWhereUniqueInput!): Student
   upsertSport(where: SportWhereUniqueInput!, create: SportCreateInput!, update: SportUpdateInput!): Sport!
-  upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
   upsertTrainer(where: TrainerWhereUniqueInput!, create: TrainerCreateInput!, update: TrainerUpdateInput!): Trainer!
+  upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
+  upsertStudent(where: StudentWhereUniqueInput!, create: StudentCreateInput!, update: StudentUpdateInput!): Student!
   updateManySports(data: SportUpdateManyMutationInput!, where: SportWhereInput): BatchPayload!
-  updateManyUsers(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
   updateManyTrainers(data: TrainerUpdateManyMutationInput!, where: TrainerWhereInput): BatchPayload!
+  updateManyUsers(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
+  updateManyStudents(data: StudentUpdateManyMutationInput!, where: StudentWhereInput): BatchPayload!
   deleteManySports(where: SportWhereInput): BatchPayload!
-  deleteManyUsers(where: UserWhereInput): BatchPayload!
   deleteManyTrainers(where: TrainerWhereInput): BatchPayload!
+  deleteManyUsers(where: UserWhereInput): BatchPayload!
+  deleteManyStudents(where: StudentWhereInput): BatchPayload!
 }
 
 enum MutationType {
@@ -72,16 +82,31 @@ type PageInfo {
   endCursor: String
 }
 
+enum Permission {
+  ADMIN
+  USER
+  SPORTCREATE
+  SPORTUPDATE
+  SPORTDELETE
+  TRAINERCREATE
+  TRAINERUPDATE
+  TRAINERDELETE
+  PERMISSIONUPDATE
+}
+
 type Query {
   sports(where: SportWhereInput, orderBy: SportOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Sport]!
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
   trainers(where: TrainerWhereInput, orderBy: TrainerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Trainer]!
+  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  students(where: StudentWhereInput, orderBy: StudentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Student]!
   sport(where: SportWhereUniqueInput!): Sport
-  user(where: UserWhereUniqueInput!): User
   trainer(where: TrainerWhereUniqueInput!): Trainer
+  user(where: UserWhereUniqueInput!): User
+  student(where: StudentWhereUniqueInput!): Student
   sportsConnection(where: SportWhereInput, orderBy: SportOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): SportConnection!
-  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
   trainersConnection(where: TrainerWhereInput, orderBy: TrainerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TrainerConnection!
+  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  studentsConnection(where: StudentWhereInput, orderBy: StudentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): StudentConnection!
 
   """Fetches an object given its ID"""
   node(
@@ -94,6 +119,10 @@ type Sport implements Node {
   id: ID!
   name: String!
   capacity: String!
+  type: SportType!
+  user: User!
+  trainer: Trainer!
+  students(where: StudentWhereInput, orderBy: StudentOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Student!]
 }
 
 """A connection to a list of items."""
@@ -110,6 +139,10 @@ input SportCreateInput {
   id: ID
   name: String!
   capacity: String!
+  type: SportType
+  user: UserCreateOneInput!
+  trainer: TrainerCreateOneInput!
+  students: StudentCreateManyInput
 }
 
 """An edge in a connection."""
@@ -128,12 +161,15 @@ enum SportOrderByInput {
   name_DESC
   capacity_ASC
   capacity_DESC
+  type_ASC
+  type_DESC
 }
 
 type SportPreviousValues {
   id: ID!
   name: String!
   capacity: String!
+  type: SportType!
 }
 
 type SportSubscriptionPayload {
@@ -175,14 +211,24 @@ input SportSubscriptionWhereInput {
   node: SportWhereInput
 }
 
+enum SportType {
+  GRUPAL
+  INDIVIDUAL
+}
+
 input SportUpdateInput {
   name: String
   capacity: String
+  type: SportType
+  user: UserUpdateOneRequiredInput
+  trainer: TrainerUpdateOneRequiredInput
+  students: StudentUpdateManyInput
 }
 
 input SportUpdateManyMutationInput {
   name: String
   capacity: String
+  type: SportType
 }
 
 input SportWhereInput {
@@ -314,22 +360,497 @@ input SportWhereInput {
 
   """All values not ending with the given string."""
   capacity_not_ends_with: String
+  type: SportType
+
+  """All values that are not equal to given value."""
+  type_not: SportType
+
+  """All values that are contained in given list."""
+  type_in: [SportType!]
+
+  """All values that are not contained in given list."""
+  type_not_in: [SportType!]
+  user: UserWhereInput
+  trainer: TrainerWhereInput
+  students_every: StudentWhereInput
+  students_some: StudentWhereInput
+  students_none: StudentWhereInput
 }
 
 input SportWhereUniqueInput {
   id: ID
 }
 
+type Student implements Node {
+  id: ID!
+  studentName: String!
+  studentEmail: String!
+  studentAge: Int!
+}
+
+"""A connection to a list of items."""
+type StudentConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [StudentEdge]!
+  aggregate: AggregateStudent!
+}
+
+input StudentCreateInput {
+  id: ID
+  studentName: String!
+  studentEmail: String!
+  studentAge: Int!
+}
+
+input StudentCreateManyInput {
+  create: [StudentCreateInput!]
+  connect: [StudentWhereUniqueInput!]
+}
+
+"""An edge in a connection."""
+type StudentEdge {
+  """The item at the end of the edge."""
+  node: Student!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum StudentOrderByInput {
+  id_ASC
+  id_DESC
+  studentName_ASC
+  studentName_DESC
+  studentEmail_ASC
+  studentEmail_DESC
+  studentAge_ASC
+  studentAge_DESC
+}
+
+type StudentPreviousValues {
+  id: ID!
+  studentName: String!
+  studentEmail: String!
+  studentAge: Int!
+}
+
+input StudentScalarWhereInput {
+  """Logical AND on all given filters."""
+  AND: [StudentScalarWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [StudentScalarWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [StudentScalarWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  studentName: String
+
+  """All values that are not equal to given value."""
+  studentName_not: String
+
+  """All values that are contained in given list."""
+  studentName_in: [String!]
+
+  """All values that are not contained in given list."""
+  studentName_not_in: [String!]
+
+  """All values less than the given value."""
+  studentName_lt: String
+
+  """All values less than or equal the given value."""
+  studentName_lte: String
+
+  """All values greater than the given value."""
+  studentName_gt: String
+
+  """All values greater than or equal the given value."""
+  studentName_gte: String
+
+  """All values containing the given string."""
+  studentName_contains: String
+
+  """All values not containing the given string."""
+  studentName_not_contains: String
+
+  """All values starting with the given string."""
+  studentName_starts_with: String
+
+  """All values not starting with the given string."""
+  studentName_not_starts_with: String
+
+  """All values ending with the given string."""
+  studentName_ends_with: String
+
+  """All values not ending with the given string."""
+  studentName_not_ends_with: String
+  studentEmail: String
+
+  """All values that are not equal to given value."""
+  studentEmail_not: String
+
+  """All values that are contained in given list."""
+  studentEmail_in: [String!]
+
+  """All values that are not contained in given list."""
+  studentEmail_not_in: [String!]
+
+  """All values less than the given value."""
+  studentEmail_lt: String
+
+  """All values less than or equal the given value."""
+  studentEmail_lte: String
+
+  """All values greater than the given value."""
+  studentEmail_gt: String
+
+  """All values greater than or equal the given value."""
+  studentEmail_gte: String
+
+  """All values containing the given string."""
+  studentEmail_contains: String
+
+  """All values not containing the given string."""
+  studentEmail_not_contains: String
+
+  """All values starting with the given string."""
+  studentEmail_starts_with: String
+
+  """All values not starting with the given string."""
+  studentEmail_not_starts_with: String
+
+  """All values ending with the given string."""
+  studentEmail_ends_with: String
+
+  """All values not ending with the given string."""
+  studentEmail_not_ends_with: String
+  studentAge: Int
+
+  """All values that are not equal to given value."""
+  studentAge_not: Int
+
+  """All values that are contained in given list."""
+  studentAge_in: [Int!]
+
+  """All values that are not contained in given list."""
+  studentAge_not_in: [Int!]
+
+  """All values less than the given value."""
+  studentAge_lt: Int
+
+  """All values less than or equal the given value."""
+  studentAge_lte: Int
+
+  """All values greater than the given value."""
+  studentAge_gt: Int
+
+  """All values greater than or equal the given value."""
+  studentAge_gte: Int
+}
+
+type StudentSubscriptionPayload {
+  mutation: MutationType!
+  node: Student
+  updatedFields: [String!]
+  previousValues: StudentPreviousValues
+}
+
+input StudentSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [StudentSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [StudentSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [StudentSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: StudentWhereInput
+}
+
+input StudentUpdateDataInput {
+  studentName: String
+  studentEmail: String
+  studentAge: Int
+}
+
+input StudentUpdateInput {
+  studentName: String
+  studentEmail: String
+  studentAge: Int
+}
+
+input StudentUpdateManyDataInput {
+  studentName: String
+  studentEmail: String
+  studentAge: Int
+}
+
+input StudentUpdateManyInput {
+  create: [StudentCreateInput!]
+  connect: [StudentWhereUniqueInput!]
+  set: [StudentWhereUniqueInput!]
+  disconnect: [StudentWhereUniqueInput!]
+  delete: [StudentWhereUniqueInput!]
+  update: [StudentUpdateWithWhereUniqueNestedInput!]
+  updateMany: [StudentUpdateManyWithWhereNestedInput!]
+  deleteMany: [StudentScalarWhereInput!]
+  upsert: [StudentUpsertWithWhereUniqueNestedInput!]
+}
+
+input StudentUpdateManyMutationInput {
+  studentName: String
+  studentEmail: String
+  studentAge: Int
+}
+
+input StudentUpdateManyWithWhereNestedInput {
+  where: StudentScalarWhereInput!
+  data: StudentUpdateManyDataInput!
+}
+
+input StudentUpdateWithWhereUniqueNestedInput {
+  where: StudentWhereUniqueInput!
+  data: StudentUpdateDataInput!
+}
+
+input StudentUpsertWithWhereUniqueNestedInput {
+  where: StudentWhereUniqueInput!
+  update: StudentUpdateDataInput!
+  create: StudentCreateInput!
+}
+
+input StudentWhereInput {
+  """Logical AND on all given filters."""
+  AND: [StudentWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [StudentWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [StudentWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  studentName: String
+
+  """All values that are not equal to given value."""
+  studentName_not: String
+
+  """All values that are contained in given list."""
+  studentName_in: [String!]
+
+  """All values that are not contained in given list."""
+  studentName_not_in: [String!]
+
+  """All values less than the given value."""
+  studentName_lt: String
+
+  """All values less than or equal the given value."""
+  studentName_lte: String
+
+  """All values greater than the given value."""
+  studentName_gt: String
+
+  """All values greater than or equal the given value."""
+  studentName_gte: String
+
+  """All values containing the given string."""
+  studentName_contains: String
+
+  """All values not containing the given string."""
+  studentName_not_contains: String
+
+  """All values starting with the given string."""
+  studentName_starts_with: String
+
+  """All values not starting with the given string."""
+  studentName_not_starts_with: String
+
+  """All values ending with the given string."""
+  studentName_ends_with: String
+
+  """All values not ending with the given string."""
+  studentName_not_ends_with: String
+  studentEmail: String
+
+  """All values that are not equal to given value."""
+  studentEmail_not: String
+
+  """All values that are contained in given list."""
+  studentEmail_in: [String!]
+
+  """All values that are not contained in given list."""
+  studentEmail_not_in: [String!]
+
+  """All values less than the given value."""
+  studentEmail_lt: String
+
+  """All values less than or equal the given value."""
+  studentEmail_lte: String
+
+  """All values greater than the given value."""
+  studentEmail_gt: String
+
+  """All values greater than or equal the given value."""
+  studentEmail_gte: String
+
+  """All values containing the given string."""
+  studentEmail_contains: String
+
+  """All values not containing the given string."""
+  studentEmail_not_contains: String
+
+  """All values starting with the given string."""
+  studentEmail_starts_with: String
+
+  """All values not starting with the given string."""
+  studentEmail_not_starts_with: String
+
+  """All values ending with the given string."""
+  studentEmail_ends_with: String
+
+  """All values not ending with the given string."""
+  studentEmail_not_ends_with: String
+  studentAge: Int
+
+  """All values that are not equal to given value."""
+  studentAge_not: Int
+
+  """All values that are contained in given list."""
+  studentAge_in: [Int!]
+
+  """All values that are not contained in given list."""
+  studentAge_not_in: [Int!]
+
+  """All values less than the given value."""
+  studentAge_lt: Int
+
+  """All values less than or equal the given value."""
+  studentAge_lte: Int
+
+  """All values greater than the given value."""
+  studentAge_gt: Int
+
+  """All values greater than or equal the given value."""
+  studentAge_gte: Int
+}
+
+input StudentWhereUniqueInput {
+  id: ID
+  studentEmail: String
+}
+
 type Subscription {
   sport(where: SportSubscriptionWhereInput): SportSubscriptionPayload
-  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
   trainer(where: TrainerSubscriptionWhereInput): TrainerSubscriptionPayload
+  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
+  student(where: StudentSubscriptionWhereInput): StudentSubscriptionPayload
 }
 
 type Trainer implements Node {
   id: ID!
   name: String!
   email: String!
+  user: User!
 }
 
 """A connection to a list of items."""
@@ -346,6 +867,12 @@ input TrainerCreateInput {
   id: ID
   name: String!
   email: String!
+  user: UserCreateOneInput!
+}
+
+input TrainerCreateOneInput {
+  create: TrainerCreateInput
+  connect: TrainerWhereUniqueInput
 }
 
 """An edge in a connection."""
@@ -411,14 +938,33 @@ input TrainerSubscriptionWhereInput {
   node: TrainerWhereInput
 }
 
+input TrainerUpdateDataInput {
+  name: String
+  email: String
+  user: UserUpdateOneRequiredInput
+}
+
 input TrainerUpdateInput {
   name: String
   email: String
+  user: UserUpdateOneRequiredInput
 }
 
 input TrainerUpdateManyMutationInput {
   name: String
   email: String
+}
+
+input TrainerUpdateOneRequiredInput {
+  create: TrainerCreateInput
+  connect: TrainerWhereUniqueInput
+  update: TrainerUpdateDataInput
+  upsert: TrainerUpsertNestedInput
+}
+
+input TrainerUpsertNestedInput {
+  update: TrainerUpdateDataInput!
+  create: TrainerCreateInput!
 }
 
 input TrainerWhereInput {
@@ -550,6 +1096,7 @@ input TrainerWhereInput {
 
   """All values not ending with the given string."""
   email_not_ends_with: String
+  user: UserWhereInput
 }
 
 input TrainerWhereUniqueInput {
@@ -564,6 +1111,7 @@ type User implements Node {
   password: String!
   resetToken: String
   resetTokenExpiry: Float
+  permissions: [Permission!]!
 }
 
 """A connection to a list of items."""
@@ -583,6 +1131,16 @@ input UserCreateInput {
   password: String!
   resetToken: String
   resetTokenExpiry: Float
+  permissions: UserCreatepermissionsInput
+}
+
+input UserCreateOneInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreatepermissionsInput {
+  set: [Permission!]
 }
 
 """An edge in a connection."""
@@ -616,6 +1174,7 @@ type UserPreviousValues {
   password: String!
   resetToken: String
   resetTokenExpiry: Float
+  permissions: [Permission!]!
 }
 
 type UserSubscriptionPayload {
@@ -657,12 +1216,22 @@ input UserSubscriptionWhereInput {
   node: UserWhereInput
 }
 
+input UserUpdateDataInput {
+  name: String
+  email: String
+  password: String
+  resetToken: String
+  resetTokenExpiry: Float
+  permissions: UserUpdatepermissionsInput
+}
+
 input UserUpdateInput {
   name: String
   email: String
   password: String
   resetToken: String
   resetTokenExpiry: Float
+  permissions: UserUpdatepermissionsInput
 }
 
 input UserUpdateManyMutationInput {
@@ -671,6 +1240,23 @@ input UserUpdateManyMutationInput {
   password: String
   resetToken: String
   resetTokenExpiry: Float
+  permissions: UserUpdatepermissionsInput
+}
+
+input UserUpdateOneRequiredInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  update: UserUpdateDataInput
+  upsert: UserUpsertNestedInput
+}
+
+input UserUpdatepermissionsInput {
+  set: [Permission!]
+}
+
+input UserUpsertNestedInput {
+  update: UserUpdateDataInput!
+  create: UserCreateInput!
 }
 
 input UserWhereInput {
